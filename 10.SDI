@@ -1,0 +1,96 @@
+,,,org 0h
+0000,02 00 30,,        jmp start
+,,,        iM equ r5; +r1
+,,,        iS equ r6; +r0
+,,,
+,,,org 30h
+0030,,start,start:
+0030,7D 00,,        mov iM,#0
+0032,7E 00,,        mov iS,#0
+0034,75 A0 00,,        mov P2,#0
+0037,75 B0 00,,        mov P3,#0
+003A,78 00,,        mov r0,#0 ; sec
+003C,79 00,,        mov r1,#0 ; min
+003E,C2 91,,        clr p1.1
+0040,C2 92,,        clr p1.2
+0042,D2 90,,        setb p1.0
+0044,,loop,loop:
+,,,
+,,,        ; проверка события
+0044,B8 00 05,,        cjne r0,#0h,rr7 ; 20 мин
+0047,B9 14 02,,        cjne r1,#14h,rr7
+004A,D2 91,,        setb P1.1
+004C,B8 00 05,rr7,rr7:    cjne r0,#0h,rr8 ; 10 мин
+004F,B9 0A 02,,        cjne r1,#0Ah,rr8
+0052,D2 92,,        setb P1.2
+0054,,rr8,rr8:
+0054,12 00 8A,,        call delay
+,,,
+0057,E8,,        mov a,r0        ; следующая секунда
+0058,24 01,,        add a,#1h
+005A,F8,,        mov r0,a
+005B,B8 3C 0A,,        cjne r0,#03Ch,rr1
+005E,78 00,,        mov r0,#0
+0060,74 00,,        mov a,#0
+0062,F5 A0,,        mov p2,a
+0064,FE,,        mov iS,a
+0065,02 00 71,,        jmp rr2
+0068,EE,rr1,rr1:    mov a,iS
+0069,24 01,,        add a,#1
+006B,D4,,        da a
+006C,FE,,        mov iS,a
+006D,F5 A0,,        mov p2,a
+006F,80 D3,,        jmp loop
+,,,
+0071,E9,rr2,rr2:    mov a,r1        ; следующая минута
+0072,24 01,,        add a,#1h
+0074,F9,,        mov r1,a
+0075,B9 3C 09,,        cjne r1,#03Ch,rr3
+0078,79 00,,        mov r1,#0
+007A,74 00,,        mov a,#0
+007C,F5 B0,,        mov p3,a
+007E,FD,,        mov iM,a
+007F,80 C3,,        jmp loop
+0081,ED,rr3,rr3:    mov a,iM
+0082,24 01,,        add a,#1
+0084,D4,,        da a
+0085,FD,,        mov iM,a
+0086,F5 B0,,        mov p3,a
+0088,80 BA,,        jmp loop
+,,,
+008A,,delay,delay:
+008A,EA,,        mov a,r2
+008B,C0 E0,,        push acc
+008D,EB,,        mov a,r3
+008E,C0 E0,,        push acc
+0090,EC,,        mov a,r4
+0091,C0 E0,,        push acc
+0093,7A 08,,        mov r2,#8    ;49  - для нормального времени
+0095,7B 0A,M1,M1:     mov r3,#10   ;100
+0097,7C 64,M2,M2:     mov r4,#100
+0099,DC FE,M3,M3:     djnz r4,M3
+009B,30 90 13,,        jnb P1.0, M4
+009E,DB F7,,        djnz r3,M2
+00A0,DA F3,,        djnz r2,M1
+00A2,D0 E0,,        pop acc
+00A4,AC E0,,        mov r4,acc
+00A6,D0 E0,,        pop acc
+00A8,AB E0,,        mov r3,acc
+00AA,D0 E0,,        pop acc
+00AC,AA E0,,        mov r2,acc
+00AE,02 00 CD,,        jmp M5
+00B1,7D 00,M4,M4:     mov iM,#0
+00B3,7E 00,,        mov iS,#0
+00B5,75 A0 00,,        mov P2,#0
+00B8,75 B0 00,,        mov P3,#0
+00BB,78 00,,        mov r0,#0
+00BD,79 00,,        mov r1,#0
+00BF,C2 92,,        clr P1.2
+00C1,D0 E0,,        pop acc
+00C3,AC E0,,        mov r4,acc
+00C5,D0 E0,,        pop acc
+00C7,AB E0,,        mov r3,acc
+00C9,D0 E0,,        pop acc
+00CB,AA E0,,        mov r2,acc
+00CD,22,M5,M5:     ret
+000E,,,END

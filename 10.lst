@@ -1,0 +1,245 @@
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 1
+
+
+
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.3
+       =====================================================
+
+
+
+	Source File:	10.asm
+	Object File:	10.hex
+	List File:	10.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:		N      0000	org 0h
+    2:	  0000	02 00 30		jmp start
+    3:		R	 R5		iM equ r5; +r1
+    4:		R	 R6		iS equ r6; +r0
+    5:
+    6:		N      0030	org 30h
+    7:	  0030			start:
+    8:	  0030	7D 00			mov iM,#0
+    9:	  0032	7E 00			mov iS,#0
+   10:	  0034	75 A0 00		mov P2,#0
+   11:	  0037	75 B0 00		mov P3,#0
+   12:	  003A	78 00			mov r0,#0 ; sec
+   13:	  003C	79 00			mov r1,#0 ; min
+   14:	  003E	C2 91			clr p1.1
+   15:	  0040	C2 92			clr p1.2
+   16:	  0042	D2 90			setb p1.0
+   17:	  0044			loop:
+   18:
+   19:					; проверка события
+   20:	  0044	B8 00 05		cjne r0,#0h,rr7 ; 20 мин
+   21:	  0047	B9 14 02		cjne r1,#14h,rr7
+   22:	  004A	D2 91			setb P1.1
+   23:	  004C	B8 00 05	rr7:	cjne r0,#0h,rr8 ; 10 мин
+   24:	  004F	B9 0A 02		cjne r1,#0Ah,rr8
+   25:	  0052	D2 92			setb P1.2
+   26:	  0054			rr8:
+   27:	  0054	12 00 8A		call delay
+   28:
+   29:	  0057	E8			mov a,r0	; следующая секунда
+   30:	  0058	24 01			add a,#1h
+   31:	  005A	F8			mov r0,a
+   32:	  005B	B8 3C 0A		cjne r0,#03Ch,rr1
+   33:	  005E	78 00			mov r0,#0
+   34:	  0060	74 00			mov a,#0
+   35:	  0062	F5 A0			mov p2,a
+   36:	  0064	FE			mov iS,a
+   37:	  0065	02 00 71		jmp rr2
+   38:	  0068	EE		rr1:	mov a,iS
+   39:	  0069	24 01			add a,#1
+   40:	  006B	D4			da a
+   41:	  006C	FE			mov iS,a
+   42:	  006D	F5 A0			mov p2,a
+   43:	  006F	80 D3			jmp loop
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 2
+
+
+
+ Line  I  Addr  Code            Source
+
+   44:
+   45:	  0071	E9		rr2:	mov a,r1	; следующая минута
+   46:	  0072	24 01			add a,#1h
+   47:	  0074	F9			mov r1,a
+   48:	  0075	B9 3C 09		cjne r1,#03Ch,rr3
+   49:	  0078	79 00			mov r1,#0
+   50:	  007A	74 00			mov a,#0
+   51:	  007C	F5 B0			mov p3,a
+   52:	  007E	FD			mov iM,a
+   53:	  007F	80 C3			jmp loop
+   54:	  0081	ED		rr3:	mov a,iM
+   55:	  0082	24 01			add a,#1
+   56:	  0084	D4			da a
+   57:	  0085	FD			mov iM,a
+   58:	  0086	F5 B0			mov p3,a
+   59:	  0088	80 BA			jmp loop
+   60:
+   61:	  008A			delay:
+   62:	  008A	EA			mov a,r2
+   63:	  008B	C0 E0			push acc
+   64:	  008D	EB			mov a,r3
+   65:	  008E	C0 E0			push acc
+   66:	  0090	EC			mov a,r4
+   67:	  0091	C0 E0			push acc
+   68:	  0093	7A 08			mov r2,#8    ;49  - для нормального времени
+   69:	  0095	7B 0A		M1:	mov r3,#10   ;100
+   70:	  0097	7C 64		M2:	mov r4,#100
+   71:	  0099	DC FE		M3:	djnz r4,M3
+   72:	  009B	30 90 13		jnb P1.0, M4
+   73:	  009E	DB F7			djnz r3,M2
+   74:	  00A0	DA F3			djnz r2,M1
+   75:	  00A2	D0 E0			pop acc
+   76:	  00A4	AC E0			mov r4,acc
+   77:	  00A6	D0 E0			pop acc
+   78:	  00A8	AB E0			mov r3,acc
+   79:	  00AA	D0 E0			pop acc
+   80:	  00AC	AA E0			mov r2,acc
+   81:	  00AE	02 00 CD		jmp M5
+   82:	  00B1	7D 00		M4:	mov iM,#0
+   83:	  00B3	7E 00			mov iS,#0
+   84:	  00B5	75 A0 00		mov P2,#0
+   85:	  00B8	75 B0 00		mov P3,#0
+   86:	  00BB	78 00			mov r0,#0
+   87:	  00BD	79 00			mov r1,#0
+   88:	  00BF	C2 92			clr P1.2
+   89:	  00C1	D0 E0			pop acc
+   90:	  00C3	AC E0			mov r4,acc
+   91:	  00C5	D0 E0			pop acc
+   92:	  00C7	AB E0			mov r3,acc
+   93:	  00C9	D0 E0			pop acc
+   94:	  00CB	AA E0			mov r2,acc
+   95:	  00CD	22		M5:	ret
+   96:				END
+
+
+
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 3
+
+
+
+
+
+                     register banks used:  ---
+
+                     no errors
+
+
+
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 4
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0130
+AC				  BIT	      D6
+ACC				  DATA	      E0
+B				  DATA	      F0
+CY				  BIT	      D7
+DELAY				  CODE	    008A	  61
+DPH				  DATA	      83
+DPL				  DATA	      82
+EA				  BIT	      AF
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+F0				  BIT	      D5
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+IM				  REGISTER    R5	   3
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+IP				  DATA	      B8
+IS				  REGISTER    R6	   4
+IT0				  BIT	      88
+IT1				  BIT	      8A
+LOOP				  CODE	    0044	  17
+M1				  CODE	    0095	  69
+M2				  CODE	    0097	  70
+M3				  CODE	    0099	  71
+M4				  CODE	    00B1	  82
+M5				  CODE	    00CD	  95
+OV				  BIT	      D2
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+PT1				  BIT	      BB
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RB8				  BIT	      9A
+RD				  BIT	      B7
+REN				  BIT	      9C
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 5
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+RESET				  CODE	    0000
+RI				  BIT	      98
+RR1				  CODE	    0068	  38
+RR2				  CODE	    0071	  45
+RR3				  CODE	    0081	  54
+RR7				  CODE	    004C	  23
+RR8				  CODE	    0054	  26
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RXD				  BIT	      B0
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SINT				  CODE	    0023
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+START				  CODE	    0030	   7
+T0				  BIT	      B4
+T1				  BIT	      B5
+TB8				  BIT	      9B
+TCON				  DATA	      88
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TXD				  BIT	      B1
+WR				  BIT	      B6
